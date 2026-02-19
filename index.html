@@ -1,48 +1,18 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <title>Shop Bích Ngọc</title>
-
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      margin: 10px;
-      background: #fafafa;
-    }
-    h1, h2{
-      text-align: center;
-    }
-    .ke{
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
-      background: #fff;
-    }
-    .admin-only{
-      display: none;
-    }
-    .admin .admin-only{
-      display: block;
-    }
-    button{
-      padding: 8px 12px;
-      margin: 4px 0;
-      cursor: pointer;
-    }
-    input{
-      width: 100%;
-      padding: 6px;
-      margin-top: 6px;
-      box-sizing: border-box;
-    }
-    @media(max-width:600px){
-      .ke{font-size:16px}
-      button{width:100%}
-    }
-  </style>
+<meta charset="utf-8">
+<title>Shop Bích Ngọc</title>
+<style>
+body{font-family:Arial;margin:10px;background:#fafafa}
+h1{text-align:center}
+.kệ{border:1px solid #ddd;padding:10px;margin-bottom:10px;background:#fff}
+.admin-only{display:none}
+.admin .admin-only{display:block}
+button{padding:8px 12px;margin:4px}
+input{width:100%;padding:6px;margin-top:6px}
+</style>
 </head>
-
 <body>
 
 <h1>🛍 Shop Bích Ngọc</h1>
@@ -51,64 +21,58 @@
   <button onclick="unlock()">🔒 MỞ QUẢN LÝ</button>
 </div>
 
-<div id="controls" class="admin-only" style="text-align:center">
-  <button onclick="mode='auto'">⚙️ TỰ ĐỘNG</button>
-  <button onclick="mode='manual'">✍️ DÁN TAY</button>
+<div class="admin-only" style="text-align:center">
+  <button onclick="mode='auto';render()">⚙️ TỰ ĐỘNG</button>
+  <button onclick="mode='manual';render()">✍️ DÁN TAY</button>
 </div>
 
 <div id="shelves"></div>
 
 <script>
-/* ===== CẤU HÌNH RIÊNG CHO SHOP BÍCH NGỌC ===== */
-const SHOP_NAME = "Bích Ngọc";
-const ADMIN_PASSWORD = "1234";
-const TOTAL_SHELVES = 32;
+const SHOP_KEY="bich-ngoc";
+const ADMIN_PASSWORD="1234";
+const TOTAL=32;
 
-/* ===== GỢI Ý TỰ ĐỘNG ===== */
-const AUTO_PRODUCTS = [
-  { name: "Đầm bé gái xinh xắn", price: "139.000đ", link: "#" },
-  { name: "Áo thun trẻ em", price: "89.000đ", link: "#" },
-  { name: "Giày sandal bé gái", price: "159.000đ", link: "#" }
+const AUTO=[
+ {name:"Váy xinh bé gái",price:"159.000đ",link:"#"},
+ {name:"Áo khoác nhẹ",price:"119.000đ",link:"#"},
+ {name:"Giày búp bê",price:"139.000đ",link:"#"}
 ];
 
-let mode = "auto";
+let mode="auto";
 
-/* ===== MỞ QUẢN LÝ ===== */
 function unlock(){
-  const p = prompt("Mật khẩu quản lý:");
-  if(p === ADMIN_PASSWORD){
-    document.body.classList.add("admin");
-    alert("✅ Đã mở quản lý cho shop " + SHOP_NAME);
-  }else{
-    alert("❌ Sai mật khẩu");
-  }
+ if(prompt("Mật khẩu quản lý:")===ADMIN_PASSWORD){
+  document.body.classList.add("admin");
+  alert("Đã mở quản lý Shop Bích Ngọc");
+ }
 }
 
-/* ===== VẼ 32 KỆ ===== */
-const box = document.getElementById("shelves");
+function save(i,d){localStorage.setItem(SHOP_KEY+i,JSON.stringify(d))}
+function load(i){return JSON.parse(localStorage.getItem(SHOP_KEY+i)||"null")}
 
-for(let i = 1; i <= TOTAL_SHELVES; i++){
-  const auto = AUTO_PRODUCTS[(i - 1) % AUTO_PRODUCTS.length];
-
-  box.innerHTML += `
-    <div class="ke">
-      <b>Kệ ${i}</b><br><br>
-
-      <div class="auto">
-        ${auto.name} – ${auto.price}<br>
-        <a href="${auto.link}" target="_blank">👉 Mua</a>
-      </div>
-
-      <div class="admin-only">
-        <hr>
-        <input placeholder="Tên sản phẩm">
-        <input placeholder="Giá">
-        <input placeholder="Link Shopee">
-      </div>
+function render(){
+ const box=document.getElementById("shelves");
+ box.innerHTML="";
+ for(let i=1;i<=TOTAL;i++){
+  const saved=load(i);
+  const auto=AUTO[(i-1)%AUTO.length];
+  const p=(mode==="manual"&&saved)?saved:auto;
+  box.innerHTML+=`
+  <div class="kệ">
+    <b>Kệ ${i}</b><br>
+    ${p.name||""} – ${p.price||""}<br>
+    ${p.link?`<a href="${p.link}" target="_blank">👉 Mua</a>`:""}
+    <div class="admin-only">
+      <input id="n${i}" value="${saved?.name||""}">
+      <input id="g${i}" value="${saved?.price||""}">
+      <input id="l${i}" value="${saved?.link||""}">
+      <button onclick="save(${i},{name:n${i}.value,price:g${i}.value,link:l${i}.value})">💾 Lưu</button>
     </div>
-  `;
+  </div>`;
+ }
 }
+render();
 </script>
-
 </body>
 </html>
